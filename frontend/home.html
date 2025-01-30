@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR Image Uploader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .file-input {
+      margin: 20px 0;
+    }
+    .upload-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .response {
+      margin-top: 20px;
+      text-align: left;
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OCR Image Uploader</h1>
+    <form id="upload-form">
+      <input
+        type="file"
+        id="file-input"
+        class="file-input"
+        accept="image/*"
+        required
+      />
+      <button type="submit" class="upload-button">Upload</button>
+    </form>
+    <div id="response" class="response" style="display: none;"></div>
+    <div id="error" class="error" style="display: none;"></div>
+  </div>
+
+  <script>
+    // Select elements
+    const uploadForm = document.getElementById("upload-form");
+    const fileInput = document.getElementById("file-input");
+    const responseDiv = document.getElementById("response");
+    const errorDiv = document.getElementById("error");
+
+    // Event listener for form submission
+    uploadForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const file = fileInput.files[0];
+
+      if (!file) {
+        errorDiv.textContent = "Please select a file.";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      // Hide previous messages
+      responseDiv.style.display = "none";
+      errorDiv.style.display = "none";
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const response = await fetch("http://localhost:3000/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "An error occurred");
+        }
+
+        const responseData = await response.json();
+
+        // Display response
+        responseDiv.textContent = JSON.stringify(responseData, null, 2);
+        responseDiv.style.display = "block";
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
