@@ -53,6 +53,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   const sHDLMatch = text.match(/S\.HDL Cholesterol:\s*(\d+)\s*mg\/di/);
   const sLDLMatch = text.match(/S\.LDL Cholesterol:\s*(\d+)\s*mg\/dl/);
   const sGOT = text.match(/SGOT:\s*(\d+)\s*U\/L/);
+  const date=text.match(/Printed By:\s*([A-Za-z ]+)/);
 
   const details = {
     name: nameMatch ? nameMatch[1].trim() : null,
