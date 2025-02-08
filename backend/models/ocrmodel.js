@@ -3,15 +3,15 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const ocrSchema = new Schema({
-    nameMatch:{type:[String]},
-    rbsMatch:{type:[Number]},
-    bloodUreaMatch:{type:[Number]},
-    sCreatinineMatch:{type:[Number]},
-    sCholesterolMatch:{type:[Number]},
-    sTGLMatch:{type:[Number]},
-    sHDLMatch:{type:[Number]},
-    sLDLMatch:{type:[Number]},
-    sGot:{type:[Number]},
+    nameMatch:{type:String},
+    rbsMatch:{type:Array},
+    bloodUreaMatch:{type:Array},
+    sCreatinineMatch:{type:Array},
+    sCholesterolMatch:{type:Array},
+    sTGLMatch:{type:Array},
+    sHDLMatch:{type:Array},
+    sLDLMatch:{type:Array},
+    sGot:{type:Array},
 
 });
 

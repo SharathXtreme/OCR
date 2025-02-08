@@ -53,7 +53,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   const sHDLMatch = text.match(/S\.HDL Cholesterol:\s*(\d+)\s*mg\/di/);
   const sLDLMatch = text.match(/S\.LDL Cholesterol:\s*(\d+)\s*mg\/dl/);
   const sGOT = text.match(/SGOT:\s*(\d+)\s*U\/L/);
-  const date=text.match(/Printed By:\s*([A-Za-z ]+)/);
+  const dateMatch = text.match(/Printed Time:\s*(\d{2}\/\d{2}\/\d{4})/)
 
   const details = {
     name: nameMatch ? nameMatch[1].trim() : null,
@@ -65,6 +65,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     SHDLCholesterol: sHDLMatch ? parseInt(sHDLMatch[1]) : null,
     SLDLCholesterol: sLDLMatch ? parseInt(sLDLMatch[1]) : null,
     SGOT: sGOT ? parseInt(sGOT[1]) : null,
+    formattedDate : dateMatch ? dateMatch[1] : new Date().toISOString().split("T")[0],
 };
 console.log(details)
 // let details=[]
@@ -86,34 +87,37 @@ if (record) {
     { _id: record._id },
     {
       $push: {
-        rbsMatch: details.RBS,
-        bloodUreaMatch: details.BloodUrea,
-        sCreatinineMatch: details.SCreatinine,
-        sCholesterolMatch: details.SCholesterol,
-        sTGLMatch: details.STGL,
-        sHDLMatch: details.SHDLCholesterol,
-        sLDLMatch: details.SLDLCholesterol,
-        sGot: details.SGOT,
+        rbsMatch:[ details.RBS ,details.formattedDate],
+        bloodUreaMatch: [details.BloodUrea,details.formattedDate],
+        sCreatinineMatch: [details.SCreatinine,details.formattedDate],
+        sCholesterolMatch: [details.SCholesterol,details.formattedDate],
+        sTGLMatch: [details.STGL,details.formattedDate],
+        sHDLMatch: [details.SHDLCholesterol,details.formattedDate],
+        sLDLMatch: [details.SLDLCholesterol,details.formattedDate],
+        sGot: [details.SGOT,details.formattedDate],
       },
     }
   ).then((data)=>console.log(data));
+  const updatedData = await OCR.findById(record._id);
   res.status(200).json({
     message: "Name exists. Appended new details.",
-    data: newrec,
+    data: updatedData,
   });
+  
 } else {
   // Create a new record
   const newrecord = {
-    nameMatch: [details.name], // Wrap in an array
-    rbsMatch: [details.RBS],
-    bloodUreaMatch: [details.BloodUrea],
-    sCreatinineMatch: [details.SCreatinine],
-    sCholesterolMatch: [details.SCholesterol],
-    sTGLMatch: [details.STGL],
-    sHDLMatch: [details.SHDLCholesterol],
-    sLDLMatch: [details.SLDLCholesterol],
-    sGot: [details.SGOT],
+    nameMatch: details.name, // Wrap in an array
+    rbsMatch: [[details.RBS,details.formattedDate]],
+    bloodUreaMatch: [[details.BloodUrea,details.formattedDate]],
+    sCreatinineMatch: [[details.SCreatinine,details.formattedDate]],
+    sCholesterolMatch: [[details.SCholesterol,details.formattedDate]],
+    sTGLMatch:[[details.STGL,details.formattedDate]],
+    sHDLMatch: [[details.SHDLCholesterol,details.formattedDate]],
+    sLDLMatch: [[details.SLDLCholesterol,details.formattedDate]],
+    sGot: [[details.SGOT,details.formattedDate]],
   };
+  console.log(newrecord);
   const newrec = await OCR.create(newrecord);
   res.status(201).json({
     message: "Name not found. Created new record.",
